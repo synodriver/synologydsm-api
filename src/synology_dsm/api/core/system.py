@@ -13,8 +13,7 @@ class SynoCoreSystem:
 
     def update(self):
         """Updates System data."""
-        raw_data = self._dsm.get(self.API_KEY, "info")
-        if raw_data:
+        if raw_data := self._dsm.get(self.API_KEY, "info"):
             self._data = raw_data["data"]
 
     #
@@ -105,18 +104,16 @@ class SynoCoreSystem:
     #
     def shutdown(self):
         """Shutdown NAS."""
-        res = self._dsm.get(
+        return self._dsm.get(
             self.API_KEY,
             "shutdown",
             max_version=1,  # shutdown method is only available on api version 1
         )
-        return res
 
     def reboot(self):
         """Reboot NAS."""
-        res = self._dsm.get(
+        return self._dsm.get(
             self.API_KEY,
             "reboot",
             max_version=1,  # reboot method is only available on api version 1
         )
-        return res

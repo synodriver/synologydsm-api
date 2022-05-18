@@ -14,8 +14,7 @@ class SynoCoreUtilization:
 
     def update(self):
         """Updates utilization data."""
-        raw_data = self._dsm.get(self.API_KEY, "get")
-        if raw_data:
+        if raw_data := self._dsm.get(self.API_KEY, "get"):
             self._data = raw_data["data"]
 
     @property
@@ -72,9 +71,7 @@ class SynoCoreUtilization:
     @property
     def memory_real_usage(self):
         """Real Memory usage from Synology DSM."""
-        if self.memory:
-            return str(self._data["memory"]["real_usage"])
-        return None
+        return str(self._data["memory"]["real_usage"]) if self.memory else None
 
     def memory_size(self, human_readable=False):
         """Total memory size of Synology DSM."""
@@ -143,15 +140,18 @@ class SynoCoreUtilization:
 
     def _get_network(self, network_id):
         """Function to get specific network (eth0, total, etc)."""
-        for network in self.network:
-            if network["device"] == network_id:
-                return network
-        return None
+        return next(
+            (
+                network
+                for network in self.network
+                if network["device"] == network_id
+            ),
+            None,
+        )
 
     def network_up(self, human_readable=False):
         """Total upload speed being used."""
-        network = self._get_network("total")
-        if network:
+        if network := self._get_network("total"):
             return_data = int(network["tx"])
             if human_readable:
                 return SynoFormatHelper.bytes_to_readable(return_data)
@@ -160,8 +160,7 @@ class SynoCoreUtilization:
 
     def network_down(self, human_readable=False):
         """Total download speed being used."""
-        network = self._get_network("total")
-        if network:
+        if network := self._get_network("total"):
             return_data = int(network["rx"])
             if human_readable:
                 return SynoFormatHelper.bytes_to_readable(return_data)

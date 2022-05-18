@@ -13,8 +13,7 @@ class SynoDSMNetwork:
 
     def update(self):
         """Updates network data."""
-        raw_data = self._dsm.get(self.API_KEY, "list")
-        if raw_data:
+        if raw_data := self._dsm.get(self.API_KEY, "list"):
             self._data = raw_data["data"]
 
     @property
@@ -39,19 +38,23 @@ class SynoDSMNetwork:
 
     def interface(self, eth_id):
         """Interface of the NAS."""
-        for interface in self.interfaces:
-            if interface["id"] == eth_id:
-                return interface
-        return None
+        return next(
+            (
+                interface
+                for interface in self.interfaces
+                if interface["id"] == eth_id
+            ),
+            None,
+        )
 
     @property
     def macs(self):
         """MACs of the NAS."""  # noqa: D403
-        macs = []
-        for interface in self.interfaces:
-            if interface.get("mac"):
-                macs.append(interface["mac"])
-        return macs
+        return [
+            interface["mac"]
+            for interface in self.interfaces
+            if interface.get("mac")
+        ]
 
     @property
     def workgroup(self):

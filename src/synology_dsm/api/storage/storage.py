@@ -14,8 +14,7 @@ class SynoStorage:
 
     def update(self):
         """Updates storage data."""
-        raw_data = self._dsm.get(self.API_KEY, "load_info")
-        if raw_data:
+        if raw_data := self._dsm.get(self.API_KEY, "load_info"):
             self._data = raw_data
             if raw_data.get("data"):
                 self._data = raw_data["data"]
@@ -45,17 +44,13 @@ class SynoStorage:
     @property
     def volumes_ids(self):
         """Returns volumes ids."""
-        volumes = []
-        for volume in self.volumes:
-            volumes.append(volume["id"])
-        return volumes
+        return [volume["id"] for volume in self.volumes]
 
     def get_volume(self, volume_id):
         """Returns a specific volume."""
-        for volume in self.volumes:
-            if volume["id"] == volume_id:
-                return volume
-        return {}
+        return next(
+            (volume for volume in self.volumes if volume["id"] == volume_id), {}
+        )
 
     def volume_status(self, volume_id):
         """Status of the volume (normal, degraded, etc)."""
@@ -98,14 +93,12 @@ class SynoStorage:
 
     def volume_disk_temp_avg(self, volume_id):
         """Average temperature of all disks making up the volume."""
-        vol_disks = self._get_disks_for_volume(volume_id)
-        if vol_disks:
+        if vol_disks := self._get_disks_for_volume(volume_id):
             total_temp = 0
             total_disks = 0
 
             for vol_disk in vol_disks:
-                disk_temp = self.disk_temp(vol_disk["id"])
-                if disk_temp:
+                if disk_temp := self.disk_temp(vol_disk["id"]):
                     total_disks += 1
                     total_temp += disk_temp
 
@@ -115,8 +108,7 @@ class SynoStorage:
 
     def volume_disk_temp_max(self, volume_id):
         """Maximum temperature of all disks making up the volume."""
-        vol_disks = self._get_disks_for_volume(volume_id)
-        if vol_disks:
+        if vol_disks := self._get_disks_for_volume(volume_id):
             max_temp = 0
 
             for vol_disk in vol_disks:
@@ -130,17 +122,11 @@ class SynoStorage:
     @property
     def disks_ids(self):
         """Returns (internal) disks ids."""
-        disks = []
-        for disk in self.disks:
-            disks.append(disk["id"])
-        return disks
+        return [disk["id"] for disk in self.disks]
 
     def get_disk(self, disk_id):
         """Returns a specific disk."""
-        for disk in self.disks:
-            if disk["id"] == disk_id:
-                return disk
-        return {}
+        return next((disk for disk in self.disks if disk["id"] == disk_id), {})
 
     def _get_disks_for_volume(self, volume_id):
         """Returns a list of disk for a specific volume."""
@@ -149,16 +135,12 @@ class SynoStorage:
 
             if pool.get("deploy_path") == volume_id:
                 # RAID disk redundancy
-                for disk_id in pool["disks"]:
-                    disks.append(self.get_disk(disk_id))
-
+                disks.extend(self.get_disk(disk_id) for disk_id in pool["disks"])
             if pool.get("pool_child"):
                 # SHR disk redundancy
                 for pool_child in pool.get("pool_child"):
                     if pool_child["id"] == volume_id:
-                        for disk_id in pool["disks"]:
-                            disks.append(self.get_disk(disk_id))
-
+                        disks.extend(self.get_disk(disk_id) for disk_id in pool["disks"])
         return disks
 
     def disk_name(self, disk_id):

@@ -13,8 +13,7 @@ class SynoCoreSecurity:
 
     def update(self):
         """Updates security data."""
-        raw_data = self._dsm.get(self.API_KEY, "system_get")
-        if raw_data:
+        if raw_data := self._dsm.get(self.API_KEY, "system_get"):
             self._data = raw_data["data"]
 
     @property
@@ -56,7 +55,7 @@ class SynoCoreSecurity:
     @property
     def status_by_check(self):
         """Gets the last scan status per check."""
-        status = {}
-        for category in self.checks:
-            status[category] = self.checks[category]["failSeverity"]
-        return status
+        return {
+            category: self.checks[category]["failSeverity"]
+            for category in self.checks
+        }

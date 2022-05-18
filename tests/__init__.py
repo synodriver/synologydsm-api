@@ -248,12 +248,10 @@ class SynologyDSMMock(SynologyDSM):
                     return DSM_6_DOWNLOAD_STATION_INFO_INFO
                 if "GetConfig" in url:
                     return DSM_6_DOWNLOAD_STATION_INFO_CONFIG
-            if SynoDownloadStation.STAT_API_KEY in url:
-                if "GetInfo" in url:
-                    return DSM_6_DOWNLOAD_STATION_STAT_INFO
-            if SynoDownloadStation.TASK_API_KEY in url:
-                if "List" in url:
-                    return DSM_6_DOWNLOAD_STATION_TASK_LIST
+            if SynoDownloadStation.STAT_API_KEY in url and "GetInfo" in url:
+                return DSM_6_DOWNLOAD_STATION_STAT_INFO
+            if SynoDownloadStation.TASK_API_KEY in url and "List" in url:
+                return DSM_6_DOWNLOAD_STATION_TASK_LIST
 
             if SynoStorage.API_KEY in url:
                 return API_SWITCHER[self.dsm_version]["STORAGE_STORAGE"][

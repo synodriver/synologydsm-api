@@ -94,7 +94,7 @@ class SynologyDSM:
     def _debuglog(self, message: str):
         """Outputs message if debug mode is enabled."""
         if self._debugmode:
-            print("DEBUG: " + message)
+            print(f"DEBUG: {message}")
 
     def _is_weird_api_url(self, api: str) -> bool:
         """Returns True if the API URL is not common.
@@ -110,12 +110,11 @@ class SynologyDSM:
         )
 
     def _build_url(self, api: str) -> str:
-        if self._is_weird_api_url(api):
-            if api == SynoStorage.API_KEY:
-                return (
-                    f"{self._base_url}/webman/modules/StorageManager/"
-                    f"storagehandler.cgi?"
-                )
+        if self._is_weird_api_url(api) and api == SynoStorage.API_KEY:
+            return (
+                f"{self._base_url}/webman/modules/StorageManager/"
+                f"storagehandler.cgi?"
+            )
 
         return f"{self._base_url}/webapi/{self.apis[api]['path']}?"
 
@@ -177,7 +176,7 @@ class SynologyDSM:
             # Not available on API version < 6 && device token is given once
             # per device_name
             self._device_token = result["data"]["did"]
-        self._debuglog("Authentication successful, token: " + str(self._session_id))
+        self._debuglog(f"Authentication successful, token: {str(self._session_id)}")
 
         if not self._information:
             self._information = SynoDSMInformation(self)
@@ -253,10 +252,10 @@ class SynologyDSM:
 
         # Request data
         response = self._execute_request(request_method, url, params, **kwargs)
-        self._debuglog("Request Method: " + request_method)
+        self._debuglog(f"Request Method: {request_method}")
         self._debuglog("Successful returned data")
-        self._debuglog("API: " + api)
-        self._debuglog("RESPONSE: " + str(response))
+        self._debuglog(f"API: {api}")
+        self._debuglog(f"RESPONSE: {str(response)}")
 
         # Handle data errors
         if isinstance(response, dict) and response.get("error") and api != API_AUTH:
@@ -286,20 +285,19 @@ class SynologyDSM:
                     url, params=encoded_params, timeout=self._timeout, **kwargs
                 )
             elif method == "POST":
-                data = {}
-                data.update(params)
-                data.update(kwargs.pop("data", {}))
+                data = dict(params)
+                data |= kwargs.pop("data", {})
                 data["mimeType"] = "application/json"
                 kwargs["data"] = data
-                self._debuglog("POST data: " + str(data))
+                self._debuglog(f"POST data: {str(data)}")
 
                 response = self._session.post(
                     url, params=params, timeout=self._timeout, **kwargs
                 )
 
-            self._debuglog("Request url: " + response.url)
-            self._debuglog("Request status_code: " + str(response.status_code))
-            self._debuglog("Request headers: " + str(response.headers))
+            self._debuglog(f"Request url: {response.url}")
+            self._debuglog(f"Request status_code: {str(response.status_code)}")
+            self._debuglog(f"Request headers: {str(response.headers)}")
 
             if response.status_code == 200:
                 # We got a DSM response
@@ -317,7 +315,7 @@ class SynologyDSM:
             # We got a 400, 401 or 404 ...
             raise RequestException(response)
 
-        except (RequestException, JSONDecodeError) as exp:
+        except RequestException as exp:
             raise SynologyDSMRequestException(exp) from exp
 
     def update(self, with_information: bool = False, with_network: bool = False):
@@ -357,8 +355,8 @@ class SynologyDSM:
         if isinstance(api, str):
             if api in ("information", SynoDSMInformation.API_KEY):
                 return False
-            if hasattr(self, "_" + api):
-                setattr(self, "_" + api, None)
+            if hasattr(self, f"_{api}"):
+                setattr(self, f"_{api}", None)
                 return True
             if api == SynoCoreSecurity.API_KEY:
                 self._security = None

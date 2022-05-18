@@ -13,8 +13,7 @@ class SynoDSMInformation:
 
     def update(self):
         """Updates information data."""
-        raw_data = self._dsm.get(self.API_KEY, "getinfo")
-        if raw_data:
+        if raw_data := self._dsm.get(self.API_KEY, "getinfo"):
             self._data = raw_data["data"]
 
     @property

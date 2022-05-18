@@ -27,8 +27,9 @@ class SynoCoreShare:
 
     def update(self):
         """Updates share data."""
-        raw_data = self._dsm.post(self.API_KEY, "list", data=self.REQUEST_DATA)
-        if raw_data:
+        if raw_data := self._dsm.post(
+            self.API_KEY, "list", data=self.REQUEST_DATA
+        ):
             self._data = raw_data["data"]
 
     @property
@@ -39,17 +40,13 @@ class SynoCoreShare:
     @property
     def shares_uuids(self):
         """Return (internal) share ids."""
-        shares = []
-        for share in self.shares:
-            shares.append(share["uuid"])
-        return shares
+        return [share["uuid"] for share in self.shares]
 
     def get_share(self, share_uuid):
         """Returns a specific share by uuid.."""
-        for share in self.shares:
-            if share["uuid"] == share_uuid:
-                return share
-        return {}
+        return next(
+            (share for share in self.shares if share["uuid"] == share_uuid), {}
+        )
 
     def share_name(self, share_uuid):
         """Return the name of this share."""
